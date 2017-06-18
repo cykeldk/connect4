@@ -141,11 +141,22 @@ public class GameController : MonoBehaviour {
     private bool checkWin(int col)
     {
         Debug.Log("checking for winner on col" + col);
-        bool win = false;
-        int row = findRowInCol(col);
-        if (checkHorizontal(col, row, true) > scoreToWin || checkHorizontal(col, row, false) > scoreToWin) return true;
-
-        return win;
+        for (int i = 0; i < directions.Length; i++)
+        {
+            var direction = directions[i];
+            var direction1 = checkPoints(0, col, findRowInCol(col), direction[0], direction[1]);
+            var direction2 = checkPoints(0, col, findRowInCol(col), -direction[0], -direction[1]);
+            var tempScore =  direction1 + direction2;
+            Debug.Log("Direction: [x:" + direction[0] + "; y: " + direction[1] + "]");
+            Debug.Log("score direction: " + direction1);
+            Debug.Log("score opposite: " + direction2);
+            if (tempScore >= scoreToWin)
+            {
+                Debug.Log(currentPlayer + " is the winner");
+                return true;
+            }
+        }
+        return false;
     }
 
     private float checkCol(int col)
@@ -199,20 +210,20 @@ public class GameController : MonoBehaviour {
         
         int nextX = positionX + directionX;
         int nextY = positionY + directionY;
-        if (!isValidPosition(nextX, nextY)) return 0;
+        if (!isValidPosition(nextX, nextY)) return count;
         var tmpPlayer = fields[nextX][nextY].GetPlayer();
         if (tmpPlayer.Equals(currentPlayer))
         {
             return 1 + checkPoints(count + 1, nextX, nextY, directionX, directionY);
         }
-        else return 0;
+        else return count;
     }
 
     private bool isValidPosition(int x, int y)
     {
         bool xValid = (x >= 0 && x < HorizontalSize);
         bool yValid = (y >= 0 && y < VerticalSize);
-        Debug.Log("position (" + x + ", " + y + ") is " + (xValid && yValid));
+        // Debug.Log("position (" + x + ", " + y + ") is " + (xValid && yValid));
         return xValid && yValid;
 
     }
