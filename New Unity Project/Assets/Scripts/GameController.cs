@@ -44,9 +44,6 @@ public class GameController : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
-
-        int input = 0;
-
         if (currentPlayer.Equals("white"))
         {
             int lastCol = PlayTurn();
@@ -54,22 +51,18 @@ public class GameController : MonoBehaviour {
             if (checkWin(lastCol))
             {
                 Debug.Log("------------------------------------------------" + currentPlayer + " wins");
-                
             }
             else
             {
                 currentPlayer = "black";
             }
-            
         }
-
-
         else
         {
             int lastCol = PlayTurn();
             if (checkWin(lastCol))
             {
-                Debug.Log("current player wins");
+                Debug.Log("------------------------------------------------" + currentPlayer + " wins");
             }
             currentPlayer = "white";
         }
@@ -79,31 +72,31 @@ public class GameController : MonoBehaviour {
     {
         List<int> possibleColsToPlay = new List<int>();
         float tempScore = 0f;
-        
+                
         for (int i = 0; i < HorizontalSize; i++)
         {
             var score = checkCol(i);
 
             if (score == tempScore)
             {
-                Debug.Log("adding " + i + " to possible cols");
+                // Debug.Log("adding " + i + " to possible cols");
                 possibleColsToPlay.Add(i);
             }
             else if (score > tempScore)
             {
-                Debug.Log("score " + score + " is new highscore at " + i);
+                // Debug.Log("score " + score + " is new highscore at " + i);
                 possibleColsToPlay.Clear();
                 possibleColsToPlay.Add(i);
                 tempScore = checkCol(i);
             }
-            Debug.Log("column " + i + " has a value of " + tempScore);
+            // Debug.Log("column " + i + " has a value of " + tempScore);
         }
         int indexToPlay = sysrand.Next(possibleColsToPlay.Count);
-        Debug.Log("amount: " + possibleColsToPlay.Count + " index chosen: " + indexToPlay);
+        Debug.Log("amount: " + possibleColsToPlay.Count + " index chosen: " + possibleColsToPlay[indexToPlay] + " Highscore: " + tempScore);
         int colToPlay = possibleColsToPlay[indexToPlay];
         AddPiece(colToPlay, currentPlayer);
         
-        Debug.Log("_________________________" + currentPlayer + " is playing column " + colToPlay);
+        Debug.Log("______________________________________" + currentPlayer + " is playing column " + colToPlay);
         return colToPlay;
     }
 
@@ -140,7 +133,7 @@ public class GameController : MonoBehaviour {
 
     private bool checkWin(int col)
     {
-        Debug.Log("checking for winner on col" + col);
+        // Debug.Log("checking for winner on col" + col);
         for (int i = 0; i < directions.Length / 2; i++)
         {
             var direction1 = directions[i];
@@ -149,8 +142,8 @@ public class GameController : MonoBehaviour {
             var scoreDirection2 = checkScoreFromPoint(1, col, findRowInCol(col) - 1, direction2[0], direction2[1]);
             var tempScore =  (scoreDirection1 + scoreDirection2 - 1);
             // Debug.Log("Direction: [x:" + direction[0] + "; y: " + direction[1] + "]");
-            Debug.Log("score direction1: " + scoreDirection1);
-            Debug.Log("score opposite: " + scoreDirection2);
+            //Debug.Log("score direction1: " + scoreDirection1);
+            //Debug.Log("score opposite: " + scoreDirection2);
             if (tempScore >= scoreToWin)
             {
                 Debug.Log(currentPlayer + " is the winner");
@@ -166,14 +159,32 @@ public class GameController : MonoBehaviour {
         if (fields[col][VerticalSize - 1].GetPiece()!=null)
         {
             // Debug.Log("column " + col + " is full");
-            return 0;
+            return 0f;
         }
-        int tmp = 0;
-        foreach(var direction in directions)
+        float tmp = 0f;
+        string debugString = "column " + col + "\n";
+        for (int i = 0; i < directions.Length / 2; i++)
         {
-            tmp += checkScoreFromPoint(0, col, findRowInCol(col), direction[0], direction[1]);
+            var row = findRowInCol(col);
+            var direction1 = directions[i];
+            var direction2 = directions[directions.Length - (i + 1)];
+            
+            var scoreDirection1 = checkScoreFromPoint(1, col, row, direction1[0], direction1[1]);
+            var scoreDirection2 = checkScoreFromPoint(1, col, row, direction2[0], direction2[1]);
+
+            debugString += i + "(" + direction1[0] + ", " + direction1[1] + ")  ::: score = " + scoreDirection1 + "\n";
+            debugString += i + "(" + direction2[0] + ", " + direction2[1] + ")  ::: score = " + scoreDirection2 + "\n";
+            debugString += "Sum : " + (scoreDirection1 + scoreDirection2) + "\n";
+
+            var tempScore = (scoreDirection1 + scoreDirection2 - 1); // minus one because checkScore from point counts the field it starts on
+            
+            if (tempScore > tmp)
+            {
+                tmp = tempScore;
+            }
         }
-        Debug.Log("score for col " + col + ": " + tmp);
+        // Debug.Log(debugString);
+        debugString = "";
         return tmp;
 
         /*
@@ -204,12 +215,12 @@ public class GameController : MonoBehaviour {
         
         int nextX = positionX + directionX;
         int nextY = positionY + directionY;
+        
         if (!isValidPosition(nextX, nextY)) return count;
         if (fields[nextX][nextY].GetPiece() == null) return count;
         var tmpPlayer = fields[nextX][nextY].GetPlayer();
         if (tmpPlayer.Equals(currentPlayer))
         {
-            // Debug.Log("current: [" + positionX + ", " + positionY + "] next: [" + nextX + ", " + nextY + "] count: " + count);
             return checkScoreFromPoint(count + 1, nextX, nextY, directionX, directionY);
         }
         else return count;
