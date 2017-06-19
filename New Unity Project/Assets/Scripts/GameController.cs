@@ -15,14 +15,16 @@ public class GameController : MonoBehaviour {
     private float verticalOffset = -4f;
     private System.Random sysrand = new System.Random();
     private int[][] directions;
-    
+    public int Confusion;
+    public string currentPlayer;
+    public string otherPlayer;
+    private bool gameOver = false;
+
     // variables used for testing
     public int addPieces;
     public bool colsTested = false;
     public int[] colsToTest = {5};
-    public string currentPlayer = "black";
-    public string otherPlayer = "white";
-    private bool gameOver = false;
+    
 
 
     // Use this for initialization
@@ -48,8 +50,9 @@ public class GameController : MonoBehaviour {
     void Update() {
         if (!gameOver)
         {
-            int lastCol = PlayTurn();
-            if (checkWin(lastCol))
+
+            int lastCol = PlayTurn(currentPlayer);
+            if (checkWin(lastCol, currentPlayer))
             {
                 Debug.Log("------------------------------------------------" + currentPlayer + " wins");
                 gameOver = true;
@@ -85,18 +88,28 @@ public class GameController : MonoBehaviour {
         //}
     }
 
-    public int PlayTurn()
+    public int PlayTurn(string playerName)
     {
         List<int> possibleColsToPlay = new List<int>();
         float tempScore = 0f;
-        
-        
+
+
         // add should i block other player method call here..
-        
+        var blockCol = canOtherPlayerWin();
+        if (blockCol >= 0)
+        {
+            int block = sysrand.Next(100);
+            if (block > Confusion)
+            {
+                Debug.Log(currentPlayer + " blocked " + otherPlayer);
+                AddPiece(blockCol, currentPlayer);
+                return blockCol;
+            }
+        }
            
         for (int i = 0; i < HorizontalSize; i++)
         {
-            var score = checkCol(i);
+            var score = checkCol(i, playerName);
 
             if (score == tempScore)
             {
@@ -108,31 +121,33 @@ public class GameController : MonoBehaviour {
                 // Debug.Log("score " + score + " is new highscore at " + i);
                 possibleColsToPlay.Clear();
                 possibleColsToPlay.Add(i);
-                tempScore = checkCol(i);
+                tempScore = checkCol(i, playerName);
             }
             // Debug.Log("column " + i + " has a value of " + tempScore);
         }
         int indexToPlay = sysrand.Next(possibleColsToPlay.Count);
         Debug.Log("amount: " + possibleColsToPlay.Count + " index chosen: " + possibleColsToPlay[indexToPlay] + " Highscore: " + tempScore);
         int colToPlay = possibleColsToPlay[indexToPlay];
-        AddPiece(colToPlay, currentPlayer);
+        AddPiece(colToPlay, playerName);
         
-        Debug.Log("______________________________________" + currentPlayer + " is playing column " + colToPlay);
+        Debug.Log("______________________________________" + playerName + " is playing column " + colToPlay);
         return colToPlay;
+    }
+
+    public int canOtherPlayerWin()
+    {
+        for (int i = 0; i < HorizontalSize; i++)
+        {
+            if (checkCol(i, otherPlayer) > 3) return i;
+        }
+        return -1;
     }
 
     public void AddPiece(int col, string player)
     {
         int row = findRowInCol(col);
-        if (addPiece(col, row, player))
-        {
-            // Debug.Log("piece added at col: [" + col + "] row: [" + row + "]");
-            
-        }
-        else
-        {
-            // Debug.Log(col + " is full");
-        }
+        addPiece(col, row, player);
+        
     }
 
     private bool addPiece(int col, int row, string player)
@@ -152,29 +167,29 @@ public class GameController : MonoBehaviour {
         return addPiece(col, row + 1, player);
     }
 
-    private bool checkWin(int col)
+    private bool checkWin(int col, string playerName)
     {
         // Debug.Log("checking for winner on col" + col);
         for (int i = 0; i < directions.Length / 2; i++)
         {
             var direction1 = directions[i];
             var direction2 = directions[directions.Length - (i + 1)];
-            var scoreDirection1 = checkScoreFromPoint(1, col, findRowInCol(col) - 1, direction1[0], direction1[1]);
-            var scoreDirection2 = checkScoreFromPoint(1, col, findRowInCol(col) - 1, direction2[0], direction2[1]);
+            var scoreDirection1 = checkScoreFromPoint(1, col, findRowInCol(col) - 1, direction1[0], direction1[1], playerName);
+            var scoreDirection2 = checkScoreFromPoint(1, col, findRowInCol(col) - 1, direction2[0], direction2[1], playerName);
             var tempScore =  (scoreDirection1 + scoreDirection2 - 1);
             // Debug.Log("Direction: [x:" + direction[0] + "; y: " + direction[1] + "]");
             //Debug.Log("score direction1: " + scoreDirection1);
             //Debug.Log("score opposite: " + scoreDirection2);
             if (tempScore >= scoreToWin)
             {
-                Debug.Log(currentPlayer + " is the winner");
+                Debug.Log(playerName + " is the winner");
                 return true;
             }
         }
         return false;
     }
 
-    private float checkCol(int col)
+    private float checkCol(int col, string playerName)
     {
         
         if (fields[col][VerticalSize - 1].GetPiece()!=null)
@@ -190,8 +205,8 @@ public class GameController : MonoBehaviour {
             var direction1 = directions[i];
             var direction2 = directions[directions.Length - (i + 1)];
             
-            var scoreDirection1 = checkScoreFromPoint(1, col, row, direction1[0], direction1[1]);
-            var scoreDirection2 = checkScoreFromPoint(1, col, row, direction2[0], direction2[1]);
+            var scoreDirection1 = checkScoreFromPoint(1, col, row, direction1[0], direction1[1], playerName);
+            var scoreDirection2 = checkScoreFromPoint(1, col, row, direction2[0], direction2[1], playerName);
 
             debugString += i + "(" + direction1[0] + ", " + direction1[1] + ")  ::: score = " + scoreDirection1 + "\n";
             debugString += i + "(" + direction2[0] + ", " + direction2[1] + ")  ::: score = " + scoreDirection2 + "\n";
@@ -231,7 +246,7 @@ public class GameController : MonoBehaviour {
     }
 
     
-    private int checkScoreFromPoint(int count, int positionX, int positionY, int directionX, int directionY)
+    private int checkScoreFromPoint(int count, int positionX, int positionY, int directionX, int directionY, string playerName)
     {
         
         int nextX = positionX + directionX;
@@ -240,9 +255,9 @@ public class GameController : MonoBehaviour {
         if (!isValidPosition(nextX, nextY)) return count;
         if (fields[nextX][nextY].GetPiece() == null) return count;
         var tmpPlayer = fields[nextX][nextY].GetPlayer();
-        if (tmpPlayer.Equals(currentPlayer))
+        if (tmpPlayer.Equals(playerName))
         {
-            return checkScoreFromPoint(count + 1, nextX, nextY, directionX, directionY);
+            return checkScoreFromPoint(count + 1, nextX, nextY, directionX, directionY, playerName);
         }
         else return count;
     }
