@@ -53,6 +53,7 @@ public class GameController : MonoBehaviour {
             {
                 Debug.Log("------------------------------------------------" + currentPlayer + " wins");
                 gameOver = true;
+                // make UI tell player that game is over, and ask for another game..
             }
             else
             {
@@ -88,7 +89,11 @@ public class GameController : MonoBehaviour {
     {
         List<int> possibleColsToPlay = new List<int>();
         float tempScore = 0f;
-                
+        
+        
+        // add should i block other player method call here..
+        
+           
         for (int i = 0; i < HorizontalSize; i++)
         {
             var score = checkCol(i);
