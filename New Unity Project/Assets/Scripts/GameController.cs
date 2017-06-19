@@ -96,14 +96,14 @@ public class GameController : MonoBehaviour {
                 possibleColsToPlay.Add(i);
                 tempScore = checkCol(i);
             }
-            //Debug.Log("column " + i + " has a value of " + tempScore);
+            Debug.Log("column " + i + " has a value of " + tempScore);
         }
         int indexToPlay = sysrand.Next(possibleColsToPlay.Count);
         Debug.Log("amount: " + possibleColsToPlay.Count + " index chosen: " + indexToPlay);
         int colToPlay = possibleColsToPlay[indexToPlay];
         AddPiece(colToPlay, currentPlayer);
         
-        Debug.Log(currentPlayer + " is playing column " + colToPlay);
+        Debug.Log("_________________________" + currentPlayer + " is playing column " + colToPlay);
         return colToPlay;
     }
 
@@ -141,15 +141,16 @@ public class GameController : MonoBehaviour {
     private bool checkWin(int col)
     {
         Debug.Log("checking for winner on col" + col);
-        for (int i = 0; i < directions.Length; i++)
+        for (int i = 0; i < directions.Length / 2; i++)
         {
-            var direction = directions[i];
-            var direction1 = checkPoints(0, col, findRowInCol(col), direction[0], direction[1]);
-            var direction2 = checkPoints(0, col, findRowInCol(col), -direction[0], -direction[1]);
-            var tempScore =  direction1 + direction2;
-            Debug.Log("Direction: [x:" + direction[0] + "; y: " + direction[1] + "]");
-            Debug.Log("score direction: " + direction1);
-            Debug.Log("score opposite: " + direction2);
+            var direction1 = directions[i];
+            var direction2 = directions[directions.Length - (i + 1)];
+            var scoreDirection1 = checkScoreFromPoint(1, col, findRowInCol(col) - 1, direction1[0], direction1[1]);
+            var scoreDirection2 = checkScoreFromPoint(1, col, findRowInCol(col) - 1, direction2[0], direction2[1]);
+            var tempScore =  (scoreDirection1 + scoreDirection2 - 1);
+            // Debug.Log("Direction: [x:" + direction[0] + "; y: " + direction[1] + "]");
+            Debug.Log("score direction1: " + scoreDirection1);
+            Debug.Log("score opposite: " + scoreDirection2);
             if (tempScore >= scoreToWin)
             {
                 Debug.Log(currentPlayer + " is the winner");
@@ -164,24 +165,18 @@ public class GameController : MonoBehaviour {
         
         if (fields[col][VerticalSize - 1].GetPiece()!=null)
         {
-            Debug.Log("column " + col + " is full");
+            // Debug.Log("column " + col + " is full");
             return 0;
         }
         int tmp = 0;
         foreach(var direction in directions)
         {
-            tmp += checkPoints(0, col, findRowInCol(col), direction[0], direction[1]);
+            tmp += checkScoreFromPoint(0, col, findRowInCol(col), direction[0], direction[1]);
         }
         Debug.Log("score for col " + col + ": " + tmp);
         return tmp;
-        
-
-        
-
-
 
         /*
-
         int row = findRowInCol(col);
         res += scoreForCenter(col, row);
         res += checkVertical(col, row);
@@ -190,7 +185,6 @@ public class GameController : MonoBehaviour {
         res += checkDiagonalDown(col, row, true) + checkDiagonalDown(col, row, false);
         return 1 - 1 / res;
         */
-
     }
 
     private int findRowInCol(int col)
@@ -205,16 +199,18 @@ public class GameController : MonoBehaviour {
     }
 
     
-    private int checkPoints(int count, int positionX, int positionY, int directionX, int directionY)
+    private int checkScoreFromPoint(int count, int positionX, int positionY, int directionX, int directionY)
     {
         
         int nextX = positionX + directionX;
         int nextY = positionY + directionY;
         if (!isValidPosition(nextX, nextY)) return count;
+        if (fields[nextX][nextY].GetPiece() == null) return count;
         var tmpPlayer = fields[nextX][nextY].GetPlayer();
         if (tmpPlayer.Equals(currentPlayer))
         {
-            return 1 + checkPoints(count + 1, nextX, nextY, directionX, directionY);
+            // Debug.Log("current: [" + positionX + ", " + positionY + "] next: [" + nextX + ", " + nextY + "] count: " + count);
+            return checkScoreFromPoint(count + 1, nextX, nextY, directionX, directionY);
         }
         else return count;
     }
@@ -229,7 +225,7 @@ public class GameController : MonoBehaviour {
     }
     
     
-    
+    /*
     private float checkVertical(int col, int row)
     {
         int column = col;
@@ -325,7 +321,7 @@ public class GameController : MonoBehaviour {
         }
         return res;
     }
-    
+    */
     private float scoreForCenter(int col, int row)
     {
         int vertical = Mathf.Min(row, Mathf.Abs(VerticalSize - row));
