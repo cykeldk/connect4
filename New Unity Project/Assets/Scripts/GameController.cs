@@ -21,6 +21,8 @@ public class GameController : MonoBehaviour {
     public bool colsTested = false;
     public int[] colsToTest = {5};
     public string currentPlayer = "black";
+    public string otherPlayer = "white";
+    private bool gameOver = false;
 
 
     // Use this for initialization
@@ -44,29 +46,43 @@ public class GameController : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
-        if (currentPlayer.Equals("white"))
+        if (!gameOver)
         {
             int lastCol = PlayTurn();
-            
             if (checkWin(lastCol))
             {
                 Debug.Log("------------------------------------------------" + currentPlayer + " wins");
+                gameOver = true;
             }
             else
             {
-                currentPlayer = "black";
+                togglePlayer();
             }
         }
-        else
-        {
-            int lastCol = PlayTurn();
-            if (checkWin(lastCol))
-            {
-                Debug.Log("------------------------------------------------" + currentPlayer + " wins");
-            }
-            currentPlayer = "white";
-        }
-	}
+        
+        //if (currentPlayer.Equals("white"))
+        //{
+        //    int lastCol = PlayTurn();
+
+        //    if (checkWin(lastCol))
+        //    {
+        //        Debug.Log("------------------------------------------------" + currentPlayer + " wins");
+        //    }
+        //    else
+        //    {
+        //        currentPlayer = "black";
+        //    }
+        //}
+        //else
+        //{
+        //    int lastCol = PlayTurn();
+        //    if (checkWin(lastCol))
+        //    {
+        //        Debug.Log("------------------------------------------------" + currentPlayer + " wins");
+        //    }
+        //    currentPlayer = "white";
+        //}
+    }
 
     public int PlayTurn()
     {
@@ -333,6 +349,14 @@ public class GameController : MonoBehaviour {
         return res;
     }
     */
+
+
+    private void togglePlayer()
+    {
+        string tmpPlayer = otherPlayer;
+        otherPlayer = currentPlayer;
+        currentPlayer = tmpPlayer;
+    }
     private float scoreForCenter(int col, int row)
     {
         int vertical = Mathf.Min(row, Mathf.Abs(VerticalSize - row));
