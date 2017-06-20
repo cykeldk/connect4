@@ -101,7 +101,7 @@ public class BoardControl : BoardInterface {
                 tmp = tempScore;
             }
         }
-        Debug.Log(debugString);
+        //Debug.Log(debugString);
         debugString = "";
         return tmp;
 

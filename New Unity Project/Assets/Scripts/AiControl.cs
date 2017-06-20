@@ -6,18 +6,25 @@ public class AiControl : PlayerInterface {
     
     private string playerName;
     private string playerColor;
+    private string opponentColor;
 
     private int confusion;
     private System.Random sysrand = new System.Random();
     private BoardInterface board;
-    
-
 
     // Use this for initialization
     public AiControl (int confusion, BoardInterface board, string color) {
         this.confusion = confusion;
         this.board = board;
         this.playerColor = color;
+        if (color.Equals("white"))
+        {
+            opponentColor = "black";
+        }
+        else
+        {
+            opponentColor = "white";
+        }
     }
 	
 	// Update is called once per frame
@@ -40,22 +47,27 @@ public class AiControl : PlayerInterface {
     
     public int PlayTurn()
     {
+        
         List<int> possibleColsToPlay = new List<int>();
         float tempScore = 0f;
-
-
-        // add should i block other player method call here..
         var blockCol = canOtherPlayerWin();
+        Debug.Log(playerColor + "'s block col returned block column: " + blockCol);
         if (blockCol >= 0)
         {
             int block = sysrand.Next(100);
             if (block > confusion)
             {
                 board.AddPiece(blockCol, playerColor);
-                Debug.Log(playerName + " blocked the other players win :-)");
+                Debug.Log(playerColor + " blocked the other players win :-)");
                 return blockCol;
             }
+            else
+            {
+                Debug.Log(playerColor + " got confused");
+            }
         }
+        
+        
 
         for (int i = 0; i < board.GetHorizontalSize(); i++)
         {
@@ -86,20 +98,15 @@ public class AiControl : PlayerInterface {
 
     public int canOtherPlayerWin()
     {
-        for (int x = 0; x < board.GetHorizontalSize(); x++)
+        
+        for (int i = 0; i < board.GetHorizontalSize(); i++)
         {
-            int y = board.findRowInCol(x) - 1;
-            var pColor = board.GetPlayerAt(x, y);
-            //Debug.Log("player at [" + x + "," + y + "] is " + pColor);
-            if (pColor == null || pColor.Equals(playerColor)) continue;
-            Debug.Log("it was not me, checking if i should block");
-
-            if (board.checkCol(x, pColor) > 3)
+            var tmpScore = board.checkCol(i, opponentColor);
+            //Debug.Log("it was not " + playerColor + ", other players tmp score for " + i + " is " + tmpScore);
+            if (tmpScore >= 3)
             {
-                Debug.Log("i should BLOCK");
-                return x;
+                return i;
             }
-
         }
         return -1;
     }

@@ -9,7 +9,7 @@ public class GameController : MonoBehaviour {
     public GameObject FieldPrefab;
     public GameObject white;
     public GameObject black;
-
+    public int lastCol;
     public int scoreToWin;
     
     public PlayerInterface currentPlayer;
@@ -26,10 +26,10 @@ public class GameController : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        
+        lastCol = -1;
         board = new BoardControl(6, 4, FieldPrefab, white, black);
-        currentPlayer = new AiControl(0, board, "white");
-        waitingPlayer = new AiControl(0, board, "black");
+        currentPlayer = new AiControl(30, board, "white");
+        waitingPlayer = new AiControl(40, board, "black");
     }
 
 
@@ -39,7 +39,7 @@ public class GameController : MonoBehaviour {
         if (!gameOver)
         {
 
-            int lastCol = currentPlayer.PlayTurn();
+            lastCol = currentPlayer.PlayTurn();
             if (checkWin(lastCol, currentPlayer.GetColor()))
             {
                 Debug.Log("------------------------------------------------" + currentPlayer.GetColor() + " wins");
@@ -76,9 +76,6 @@ public class GameController : MonoBehaviour {
         //}
     }
 
-    
-    
-    
 
     private bool checkWin(int col, string playerName)
     {
@@ -213,6 +210,7 @@ public class GameController : MonoBehaviour {
         waitingPlayer = currentPlayer;
         currentPlayer = tmpPlayer;
     }
+    /*
     private float scoreForCenter(int col, int row)
     {
         int vertical = Mathf.Min(row, Mathf.Abs(VerticalSize - row));
@@ -222,6 +220,6 @@ public class GameController : MonoBehaviour {
         // return 1 - 1 / tempScore;
         return 0;
     }
-
+    */
     
 }
