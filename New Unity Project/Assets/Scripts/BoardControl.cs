@@ -8,8 +8,8 @@ public class BoardControl : BoardInterface {
     public GameObject black;
     public float fieldSize;
     private FieldInfo[][] fields;
-    private float horizontalOffset = 2f;
-    private float verticalOffset = -4f;
+    //private float horizontalOffset = 2f;
+    //private float verticalOffset = -4f;
     private int VerticalSize;
     private int HorizontalSize;
     private int[][] directions;

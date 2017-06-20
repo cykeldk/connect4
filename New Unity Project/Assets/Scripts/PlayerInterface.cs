@@ -4,7 +4,7 @@ using UnityEngine;
 
 public interface PlayerInterface  {
 
-    int PlayTurn();
+    bool PlayTurn();
     bool IsAi();
     string GetName();
     string GetColor();

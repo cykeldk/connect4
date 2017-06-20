@@ -45,7 +45,7 @@ public class AiControl : PlayerInterface {
     }
 
     
-    public int PlayTurn()
+    public bool PlayTurn()
     {
         
         List<int> possibleColsToPlay = new List<int>();
@@ -59,7 +59,7 @@ public class AiControl : PlayerInterface {
             {
                 board.AddPiece(blockCol, playerColor);
                 Debug.Log(playerColor + " blocked the other players win :-)");
-                return blockCol;
+                return true;
             }
             else
             {
@@ -93,7 +93,7 @@ public class AiControl : PlayerInterface {
         board.AddPiece(colToPlay, playerColor);
 
         //Debug.Log("______________________________________" + playerName + " is playing column " + colToPlay);
-        return colToPlay;
+        return true;
     }
 
     public int canOtherPlayerWin()

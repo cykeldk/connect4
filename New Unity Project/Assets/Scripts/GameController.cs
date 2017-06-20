@@ -15,6 +15,7 @@ public class GameController : MonoBehaviour {
     public PlayerInterface currentPlayer;
     public PlayerInterface waitingPlayer;
     private bool gameOver = false;
+    private bool turnPlayed = false;
     
 
     // variables used for testing
@@ -26,10 +27,9 @@ public class GameController : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        lastCol = -1;
         board = new BoardControl(6, 4, FieldPrefab, white, black);
         currentPlayer = new AiControl(30, board, "white");
-        waitingPlayer = new AiControl(40, board, "black");
+        waitingPlayer = new HumanPlayerControl(board, "player1", "black");
     }
 
 
@@ -39,16 +39,19 @@ public class GameController : MonoBehaviour {
         if (!gameOver)
         {
 
-            lastCol = currentPlayer.PlayTurn();
-            if (checkWin(lastCol, currentPlayer.GetColor()))
+            turnPlayed = currentPlayer.PlayTurn();
+            if (turnPlayed)
             {
-                Debug.Log("------------------------------------------------" + currentPlayer.GetColor() + " wins");
-                gameOver = true;
-                // make UI tell player that game is over, and ask for another game..
-            }
-            else
-            {
-                togglePlayer();
+                if (checkWin(currentPlayer.GetColor()))
+                {
+                    Debug.Log("------------------------------------------------" + currentPlayer.GetColor() + " wins");
+                    gameOver = true;
+                    // make UI tell player that game is over, and ask for another game..
+                }
+                else
+                {
+                    togglePlayer();
+                }
             }
         }
         
@@ -77,24 +80,27 @@ public class GameController : MonoBehaviour {
     }
 
 
-    private bool checkWin(int col, string playerName)
+    private bool checkWin(string playerName)
     {
         int[][] directions = board.GetDirections();
         // Debug.Log("checking for winner on col" + col);
-        for (int i = 0; i < board.GetDirections().Length / 2; i++)
+        for (int col = 0; col < HorizontalSize; col++)
         {
-            var direction1 = directions[i];
-            var direction2 = directions[directions.Length - (i + 1)];
-            var scoreDirection1 = board.checkScoreFromPoint(1, col, board.findRowInCol(col) - 1, direction1[0], direction1[1], playerName);
-            var scoreDirection2 = board.checkScoreFromPoint(1, col, board.findRowInCol(col) - 1, direction2[0], direction2[1], playerName);
-            var tempScore =  (scoreDirection1 + scoreDirection2 - 1);
-            // Debug.Log("Direction: [x:" + direction[0] + "; y: " + direction[1] + "]");
-            //Debug.Log("score direction1: " + scoreDirection1);
-            //Debug.Log("score opposite: " + scoreDirection2);
-            if (tempScore >= scoreToWin)
+            for (int i = 0; i < board.GetDirections().Length / 2; i++)
             {
-                // Debug.Log(playerName + " is the winner");
-                return true;
+                var direction1 = directions[i];
+                var direction2 = directions[directions.Length - (i + 1)];
+                var scoreDirection1 = board.checkScoreFromPoint(1, col, board.findRowInCol(col) - 1, direction1[0], direction1[1], playerName);
+                var scoreDirection2 = board.checkScoreFromPoint(1, col, board.findRowInCol(col) - 1, direction2[0], direction2[1], playerName);
+                var tempScore = (scoreDirection1 + scoreDirection2 - 1);
+                // Debug.Log("Direction: [x:" + direction[0] + "; y: " + direction[1] + "]");
+                //Debug.Log("score direction1: " + scoreDirection1);
+                //Debug.Log("score opposite: " + scoreDirection2);
+                if (tempScore >= scoreToWin)
+                {
+                    // Debug.Log(playerName + " is the winner");
+                    return true;
+                }
             }
         }
         return false;
